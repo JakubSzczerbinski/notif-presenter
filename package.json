@@ -13,7 +13,7 @@
     "electron": "^2.0.5"
   },
   "dependencies": {
-    "babel-preset-env": "^6.3.13",
+    "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.3.13",
     "babel-register": "^6.3.13",
     "react": "^15.3.2",
