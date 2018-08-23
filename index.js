@@ -12,6 +12,7 @@ const url = require('url');
     win = new BrowserWindow({
 	width: 1920,
 	height: 1080})
+    win.setFullScreen(true);
   
     // and load the index.html of the app.
     win.loadURL(url.format({
