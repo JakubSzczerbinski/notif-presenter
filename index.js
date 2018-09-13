@@ -10,13 +10,13 @@ const url = require('url');
   function createWindow () {
     // Create the browser window.
     win = new BrowserWindow({
-	width: 1920,
-	height: 1080})
+    	width: 1920,
+    	height: 1080})
     win.setFullScreen(true);
   
     // and load the index.html of the app.
     win.loadURL(url.format({
-	pathname: path.join(__dirname, 'browser/index.html'),
+    	pathname: path.join(__dirname, 'browser/index.html'),
         protocol: 'file:',
         slashes: true}))
   

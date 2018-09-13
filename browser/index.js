@@ -74,6 +74,22 @@ class Clock extends React.Component {
 	}
 }
 
+function Background(props)
+{
+	return (
+			<div id="background">{props.children}</div>
+		)
+}
+
+function Weather(props)
+{
+	return (
+		<div className="container">
+			<a className="weatherwidget-io" href="https://forecast7.com/en/51d1117d04/wroclaw/" data-label_1="WROCŁAW" data-label_2="WEATHER" data-font="Roboto" data-icons="Climacons Animated" data-basecolor="rgba(250, 250, 250, 1.0)" data-days="3" data-theme="pure" >WROCŁAW WEATHER</a>
+		</div>
+	);
+}
+
 function Notification(props)
 {
 	return (
@@ -213,17 +229,20 @@ class Calendar extends React.Component
 function Layout(props)
 {
 	return (
-		<div id="grid-layout">
-			<div id="notifs" className="area">
-				<Notifs/>
+		<Background>
+			<div id="grid-layout">
+				<div id="notifs" className="area">
+					<Notifs/>
+				</div>
+				<div id="clock" className="area">
+					<Clock/>
+				</div>
+				<div id="calendar" className="area">
+					<Weather/>
+					<Calendar/>
+				</div>
 			</div>
-			<div id="clock" className="area">
-				<Clock/>
-			</div>
-			<div id="calendar" className="area">
-				<Calendar/>
-			</div>
-		</div>
+		</Background>
 		)
 }
 
