@@ -72,6 +72,7 @@ body {
     background: url(https://i0.wp.com/www.qygjxz.com/data/out/18/4941473-background.png) no-repeat center center fixed;
     background-repeat: no-repeat;
     background-size: cover;
-	font: 500 1.2em/1.2 'Roboto Light', sans-serif;
+	font: 500 1.2em/1.2 'Roboto', sans-serif;
+	font-weight: 100;
 }
 
