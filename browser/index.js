@@ -74,20 +74,38 @@ class Clock extends React.Component {
 	}
 }
 
+class Weather extends React.Component {
+
+	constructor(props)
+	{
+	    super(props);
+	}
+
+	componentDidMount() {
+		this.timerID = setInterval(
+		  () => __weatherwidget_init(),
+		  3600000
+		);
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.timerID);
+	}
+
+	render() {
+		return (
+			<div className="container">
+				<a className="weatherwidget-io" href="https://forecast7.com/en/51d1117d04/wroclaw/" data-label_1="WROCŁAW" data-label_2="WEATHER" data-font="Roboto" data-icons="Climacons Animated" data-basecolor="rgba(250, 250, 250, 1.0)" data-days="3" data-theme="pure" >WROCŁAW WEATHER</a>
+			</div>
+		);
+	}
+}
+
 function Background(props)
 {
 	return (
 			<div id="background">{props.children}</div>
 		)
-}
-
-function Weather(props)
-{
-	return (
-		<div className="container">
-			<a className="weatherwidget-io" href="https://forecast7.com/en/51d1117d04/wroclaw/" data-label_1="WROCŁAW" data-label_2="WEATHER" data-font="Roboto" data-icons="Climacons Animated" data-basecolor="rgba(250, 250, 250, 1.0)" data-days="3" data-theme="pure" >WROCŁAW WEATHER</a>
-		</div>
-	);
 }
 
 function Notification(props)
