@@ -132,7 +132,7 @@ class Notifs extends React.Component
 		this.checkNotifs();
 		this.timerID = setInterval(
 		  () => this.checkNotifs(),
-		  10000
+		  30000
 		);
 	}
 
@@ -144,7 +144,7 @@ class Notifs extends React.Component
 	{
 		console.log("Checking notifs");
 		const xhr = new XMLHttpRequest();
-		xhr.open('GET', api_url + "?query={allValidNotifs{id title subtitle}}", true);
+		xhr.open('GET', api_url + "?query={allValidNotifs{id title subtitle data source}}", true);
 		xhr.send();
 		xhr.addEventListener("readystatechange", updateNotifs, false);
 		const component = this;
@@ -163,8 +163,11 @@ class Notifs extends React.Component
 		let result = []
 		for (let notif of this.state.notifs)
 		{
-			result.push(
-				<Notification key={notif.id} title={notif.title} description={notif.subtitle} />)
+			if (notif.source != "google cal")
+			{
+				result.push(
+					<Notification key={notif.id} title={notif.title} description={notif.subtitle} />)
+			}
 		}
 		return <div> {result} </div>
 	}
@@ -173,8 +176,8 @@ class Notifs extends React.Component
 function Event(props)
 {
 	return (
-		<div className="container">
-			<div className="title">
+		<div className="calendar_container">
+			<div className="calendar_title">
 				{ props.title }
 			</div>
 			<i className="fas fa-map-marker"></i> { props.location } <br/>
@@ -189,14 +192,14 @@ class Calendar extends React.Component
 	constructor(props)
 	{
 		super(props)
-		this.state = { events: [] };
+		this.state = { notifs: [] };
 	}
 
 	componentDidMount() {
-		this.checkEvents();
+		this.checkNotifs();
 		this.timerID = setInterval(
-		  () => this.checkEvents(),
-		  10000
+		  () => this.checkNotifs(),
+		  30000
 		);
 	}
 
@@ -204,42 +207,46 @@ class Calendar extends React.Component
 		clearInterval(this.timerID);
 	}
 
-	checkEvents()
+	checkNotifs()
 	{
 		console.log("Checking notifs");
-		const now = new Date()
-		const isoDate = now.toISOString();
-		const query = '{eventsFrom(from : "' + isoDate + '", limit: 10){id name location startTime endTime }}'
 		const xhr = new XMLHttpRequest();
-		xhr.open('GET', api_url + "?query=" + query, true);
+		xhr.open('GET', api_url + "?query={allValidNotifs{id title subtitle data source}}", true);
 		xhr.send();
-		xhr.addEventListener("readystatechange", updateEvents, false);
+		xhr.addEventListener("readystatechange", updateNotifs, false);
 		const component = this;
-		function updateEvents()
+		function updateNotifs()
 		{
-			console.log("XDDD")
+			console.log("XDD");
 		    if (xhr.readyState == 4 && xhr.status == 200) {
 				const response = JSON.parse(xhr.responseText);
-				component.setState({ events: response.data.eventsFrom });
+				component.setState({ notifs: response.data.allValidNotifs });
 		    }
 		}
 	}
 
 	render()
 	{
+		const options = { weekday: 'short', month: 'short', day: 'numeric' };
 		let result = []
-		for (let event of this.state.events)
+		for (let notif of this.state.notifs)
 		{
-			const startDate = new Date(Date.parse(event.startTime));
-			const endDate = new Date(Date.parse(event.endTime));
-			// console.log(startDate);
-			const sTime = startDate.toLocaleTimeString();
-			const eTime = endDate.toLocaleTimeString();
-			const date = startDate.toDateString();
-			result.push(<Event key={event.id} title={event.name} startDate={date} startTime={sTime} endTime={eTime} location={event.location}/>)
+			if (notif.source == "google cal")
+			{
+				const data = JSON.parse(notif.data).data;
+				const startDate = new Date(Date.parse(data.startDateTime));
+				const endDate = new Date(Date.parse(data.endDateTime));
+				// console.log(startDate);
+				const sTime = startDate.toLocaleTimeString("en-UK");
+				const eTime = endDate.toLocaleTimeString("en-UK");
+				const date = startDate.toDateString("en-UK");
+				result.push(<Event key={notif.id} title={notif.title} startDate={date} startTime={sTime} endTime={eTime} location={data.location}/>)
+			}
 		}
 		return <div> {result} </div>
 	}
+
+
 }
 
 function Layout(props)
@@ -252,10 +259,10 @@ function Layout(props)
 				</div>
 				<div id="clock" className="area">
 					<Clock/>
+					<Calendar/>
 				</div>
 				<div id="calendar" className="area">
 					<Weather/>
-					<Calendar/>
 				</div>
 			</div>
 		</Background>
