@@ -229,7 +229,15 @@ class Calendar extends React.Component
 	{
 		const options = { weekday: 'short', month: 'short', day: 'numeric' };
 		let result = []
-		for (let notif of this.state.notifs)
+		const notifs = this.state.notifs.filter((notif) => {
+			return notif.source == "google cal";
+		});
+		notifs.sort((lhs, rhs) => {
+			const ldata = JSON.parse(lhs.data).data;
+			const rdata = JSON.parse(rhs.data).data;
+			return new Date(ldata.startDateTime) > new Date(rdata.startDateTime);
+		})
+		for (let notif of notifs)
 		{
 			if (notif.source == "google cal")
 			{
