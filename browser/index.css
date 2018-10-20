@@ -113,3 +113,23 @@ body {
 	font-weight: 100;
 }
 
+
+.cal_frame {
+	display: grid;
+	grid-auto-rows: 1fr;
+}
+
+.cal_event {
+        font-size: 0.8em;
+	padding: 2px;
+	background-color: #87CEEB;
+	grid-column: 2;	
+}
+
+.cal_label {
+	padding-bottom: 8px;
+	grid-column: 1;
+	border-top: 1px solid black;
+	grid-row: auto / 4 span;
+}
+

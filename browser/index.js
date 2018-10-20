@@ -142,7 +142,6 @@ class Notifs extends React.Component
 
 	checkNotifs()
 	{
-		console.log("Checking notifs");
 		const xhr = new XMLHttpRequest();
 		xhr.open('GET', api_url + "?query={allValidNotifs{id title subtitle data source}}", true);
 		xhr.send();
@@ -150,7 +149,6 @@ class Notifs extends React.Component
 		const component = this;
 		function updateNotifs()
 		{
-			console.log("XDD");
 		    if (xhr.readyState == 4 && xhr.status == 200) {
 				const response = JSON.parse(xhr.responseText);
 				component.setState({ notifs: response.data.allValidNotifs });
@@ -169,7 +167,7 @@ class Notifs extends React.Component
 					<Notification key={notif.id} title={notif.title} description={notif.subtitle} />)
 			}
 		}
-		return <div> {result} </div>
+          return <div> {result} </div>
 	}
 }
 
@@ -187,74 +185,122 @@ function Event(props)
 		)
 }
 
-class Calendar extends React.Component
-{
-	constructor(props)
-	{
-		super(props)
-		this.state = { notifs: [] };
-	}
+class Calendar extends React.Component {
 
-	componentDidMount() {
-		this.checkNotifs();
-		this.timerID = setInterval(
-		  () => this.checkNotifs(),
-		  30000
+       constructor(props)
+       {
+               super(props)
+               this.state = { events: [] };
+       }
+
+       componentDidMount() {
+               this.checkNotifs();
+               this.timerID = setInterval(
+                 () => this.checkNotifs(),
+                 30000);
+       }
+       componentWillUnmount() {
+               clearInterval(this.timerID);
+       }
+
+       checkNotifs()
+       {
+               const xhr = new XMLHttpRequest();
+               xhr.open('GET', api_url + "?query={allValidNotifs{id title subtitle data source}}", true);
+               xhr.send();
+               xhr.addEventListener("readystatechange", updateNotifs, false);
+               const component = this;
+               function updateNotifs()
+               {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                               const response = JSON.parse(xhr.responseText);
+                              let notifs = response.data.allValidNotifs;
+
+               notifs = notifs.filter((notif) => {
+                       return notif.source == "google cal";
+               });
+               notifs.sort((lhs, rhs) => {
+                       const ldata = JSON.parse(lhs.data).data;
+                       const rdata = JSON.parse(rhs.data).data;
+                       return new Date(ldata.startDateTime) > new Date(rdata.startDateTime);
+               })
+               let events = []
+               for (let notif of notifs)
+               {
+                       if (notif.source == "google cal")
+                       {
+                               const data = JSON.parse(notif.data).data;
+                               const startDate = new Date(Date.parse(data.startDateTime));
+                               const endDate = new Date(Date.parse(data.endDateTime));
+                               const title = notif.title;
+                               events.push({title: title, startDateTime: startDate, endDateTime: endDate});
+                       }
+               }
+                               component.setState({ events: events });
+                  }
+               }
+       }
+render() {
+    const timeRange = { startHour: 6, endHour: 24 };
+    const numberOfRows = (timeRange.endHour - timeRange.startHour) * 4;
+    const divFrame = {
+      gridTemplateColumns: "100px 1fr"
+    }
+    let events = this.state.events;
+//    [
+//      {
+//        title: "Analiza numeryczna (M) - repetytorium",
+//        startDateTime: new Date("2018-10-20T14:15:00+02:00"),
+//        endDateTime: new Date("2018-10-20T16:00:00+02:00"),
+//      }
+//    ]
+    let cal_events = []
+    for (let i = 0; i < events.length; i++)
+    {
+      const now = new Date()
+      const todayMidnight = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+      0,0,0);
+      const e = events[i];
+      const title = e.title;
+      const startDateTime = e.startDateTime;
+      const endDateTime = e.endDateTime;
+      const startMinute = (startDateTime - todayMidnight) / (1000 * 60);
+      let startRow = (startMinute - (timeRange.startHour * 60)) / 15;
+      const endMinute = (endDateTime - todayMidnight) / (1000 * 60);
+      let endRow = (endMinute - (timeRange.startHour * 60)) / 15;
+      if ((endRow <= 0 && startRow <= 0) || (endRow >= numberOfRows && startRow >= numberOfRows))
+        continue;
+
+      if (endRow > numberOfRows)
+        endRow = numberOfRows;
+
+      if (startRow < 0)
+        startRow = 0;
+
+      const eventStyle = {
+        gridRowStart: startRow + 1,
+        gridRowEnd: endRow + 1,
+      }
+      
+      cal_events.push(<div style={eventStyle} className="cal_event"> {title} </div>);  
+    }
+
+    let cal_labels = []
+    for (let i = timeRange.startHour; i < timeRange.endHour; i++)
+    {
+      let text = i + ":00";
+      cal_labels.push(<div className="cal_label"> {text} </div>);
+    }
+    return (
+			<div style={divFrame} className="container cal_frame">
+        {cal_labels}
+			  {cal_events}
+      </div>	
 		);
 	}
-
-	componentWillUnmount() {
-		clearInterval(this.timerID);
-	}
-
-	checkNotifs()
-	{
-		console.log("Checking notifs");
-		const xhr = new XMLHttpRequest();
-		xhr.open('GET', api_url + "?query={allValidNotifs{id title subtitle data source}}", true);
-		xhr.send();
-		xhr.addEventListener("readystatechange", updateNotifs, false);
-		const component = this;
-		function updateNotifs()
-		{
-			console.log("XDD");
-		    if (xhr.readyState == 4 && xhr.status == 200) {
-				const response = JSON.parse(xhr.responseText);
-				component.setState({ notifs: response.data.allValidNotifs });
-		    }
-		}
-	}
-
-	render()
-	{
-		const options = { weekday: 'short', month: 'short', day: 'numeric' };
-		let result = []
-		const notifs = this.state.notifs.filter((notif) => {
-			return notif.source == "google cal";
-		});
-		notifs.sort((lhs, rhs) => {
-			const ldata = JSON.parse(lhs.data).data;
-			const rdata = JSON.parse(rhs.data).data;
-			return new Date(ldata.startDateTime) > new Date(rdata.startDateTime);
-		})
-		for (let notif of notifs)
-		{
-			if (notif.source == "google cal")
-			{
-				const data = JSON.parse(notif.data).data;
-				const startDate = new Date(Date.parse(data.startDateTime));
-				const endDate = new Date(Date.parse(data.endDateTime));
-				// console.log(startDate);
-				const sTime = startDate.toLocaleTimeString("en-UK");
-				const eTime = endDate.toLocaleTimeString("en-UK");
-				const date = startDate.toDateString("en-UK");
-				result.push(<Event key={notif.id} title={notif.title} startDate={date} startTime={sTime} endTime={eTime} location={data.location}/>)
-			}
-		}
-		return <div> {result} </div>
-	}
-
-
 }
 
 function Layout(props)
