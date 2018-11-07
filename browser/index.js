@@ -2,7 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-let api_url = "http://192.168.1.109:4000/graphql"
+let api_url = "http://localhost:4000/graphql"
 
 function Container (props) {
 	return (
